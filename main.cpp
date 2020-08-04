@@ -8,17 +8,19 @@
 #include "model.h"
 #include "formulations.h"
 
+using namespace towr;
+
 int main() {
-    NlpFormulation formulation = turn();
-    auto &kinematic_model = formulation.model_.kinematic_model_;
+    NlpFormulation formulation = trot_turn();
+    auto& kinematic_model = formulation.model_.kinematic_model_;
 
     ifopt::Problem nlp;
     SplineHolder solution;
-    for (auto &c : formulation.GetVariableSets(solution))
+    for (auto& c : formulation.GetVariableSets(solution))
         nlp.AddVariableSet(c);
-    for (auto &c : formulation.GetConstraints(solution))
+    for (auto& c : formulation.GetConstraints(solution))
         nlp.AddConstraintSet(c);
-    for (auto &c:formulation.GetCosts())
+    for (auto& c:formulation.GetCosts())
         nlp.AddCostSet(c);
 
     auto solver = std::make_shared<ifopt::IpoptSolver>();
@@ -38,7 +40,6 @@ int main() {
         output.insert(output.end(), {base_lin.x(), base_lin.y(), base_lin.z()});
 
         Eigen::Vector3d rad = solution.base_angular_->GetPoint(t).p();
-        // Eigen::Vector3d deg = rad / M_PI * 180;
         output.insert(output.end(), {rad.x(), rad.y(), rad.z()});
 
         for (int i = 0; i < kinematic_model->GetNumberOfEndeffectors(); ++i) {
